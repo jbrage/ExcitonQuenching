@@ -27,7 +27,8 @@ should create the share object evolveDensitiesCython.so
 1. cd ../
 2. python2.7 main.py
 
-should run a test version
+will run a test version
+
 
 
 
