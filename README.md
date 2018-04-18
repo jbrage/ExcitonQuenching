@@ -14,8 +14,7 @@ This version was tested with
 Install e.g. with
 
 * sudo apt-get install make
-* sudo apt-get install python-pip
-* pip install Cython
+* sudo apt-get install cython
 
 ## Run an example
 
