@@ -11,22 +11,24 @@ This version was tested with
 * Cython 0.27 or newer 
 * GNU Make v. 4.1
 
+Install e.g. with
+
 * sudo apt-get install make
 * sudo apt-get install python-pip
 * pip install Cython
 
 ## Run an example
 
-#### Compile the cython code used to solve the Blanc equation
+Compile the cython code used to solve the Blanc equation
 1. cd ExcitonQuenching/cython
 2. make
 
-#### should create the share object evolveDensitiesCython.so
+should create the share object evolveDensitiesCython.so
 
 1. cd ../
 2. python2.7 main.py
 
-#### should run a test version
+should run a test version
 
 
 
