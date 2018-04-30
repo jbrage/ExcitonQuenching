@@ -1,6 +1,7 @@
 # ExcitonQuenching
 Calculation of ionization quenching correction factors in plastic scintillators
 
+OBS: To be updated ASAP
 
 ## Installation
 Linux (Tested on Ubuntu 16.04)
