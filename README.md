@@ -14,19 +14,23 @@ This version was tested with
 
 Install e.g. with
 
-* sudo apt-get install make
-* sudo apt-get install cython
-
+```
+sudo apt-get install make
+sudo apt-get install cython
+```
 ## Run an example
 
 Compile the cython code used to solve the Blanc equation
-1. cd ExcitonQuenching/cython
-2. make
-
+```
+cd ExcitonQuenching/cython
+make
+```
 should create the share object evolveDensitiesCython.so
 
-1. cd ../
-2. python2.7 main.py
+```
+cd ../
+python2 main.py
+```
 
 will run a test version
 
