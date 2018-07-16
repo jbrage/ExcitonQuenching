@@ -1,7 +1,7 @@
 # ExcitonQuenching
 Calculation of ionization quenching correction factors in plastic scintillators
 
-OBS: To be updated
+OBS: To be updated  
 Please contact jeppebrage@gmail.com if intended to use
 
 ## Installation
