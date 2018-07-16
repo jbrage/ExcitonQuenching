@@ -1,7 +1,8 @@
 # ExcitonQuenching
 Calculation of ionization quenching correction factors in plastic scintillators
 
-OBS: To be updated ASAP
+OBS: To be updated
+Please contact jeppebrage@gmail.com if intended to use
 
 ## Installation
 Linux (Tested on Ubuntu 16.04)
@@ -22,16 +23,12 @@ sudo apt-get install cython
 
 Compile the cython code used to solve the Blanc equation
 ```
-cd ExcitonQuenching/cython
-make
+cd ExcitonQuenching/cython && make
 ```
-should create the share object evolveDensitiesCython.so
-
+which creates the shared object evolveDensitiesCython.so.
 ```
-cd ../
-python2 main.py
+cd ../ && python2 main.py
 ```
-
 will run a test version
 
 
