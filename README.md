@@ -9,7 +9,7 @@ Linux (Tested on Ubuntu 16.04)
 
 This version was tested with
 
-* Python2.7
+* python2 and python3
 * Cython 0.27 or newer 
 * GNU Make v. 4.1
 
@@ -27,7 +27,7 @@ cd ExcitonQuenching/cython && make
 ```
 which creates the shared object evolveDensitiesCython.so.
 ```
-cd ../ && python2 main.py
+cd ../ && python main.py
 ```
 will run a test version
 
