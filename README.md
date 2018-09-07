@@ -1,5 +1,8 @@
 # ExcitonQuenching
-Calculation of ionization quenching correction factors in plastic scintillators
+Calculation of ionization quenching correction factors in plastic scintillators.
+
+Further details can be found in _Christensen JB and Andersen CE, Phys. Med. Biol. (2018)_  
+https://doi.org/10.1088/1361-6560/aadf2d
 
 _OBS: To be updated_  
 Please contact jeppebrage@gmail.com if intended to use
