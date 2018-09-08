@@ -1,7 +1,8 @@
 # ExcitonQuenching
-Calculation of ionization quenching correction factors in plastic scintillators.
+Calculation of ionization quenching correction factors in organic plastic scintillators.
 
-Further details can be found in _Christensen JB and Andersen CE, Phys. Med. Biol. (2018)_  
+Further details can be found in  
+Christensen JB and Andersen CE (2018) _Relating ionization quenching in organic plastic scintillators to basic material properties by modelling excitation density transport and amorphous track structure during proton irradiation_, Phys. Med. Biol.      
 https://doi.org/10.1088/1361-6560/aadf2d
 
 _OBS: To be updated_  
