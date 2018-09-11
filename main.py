@@ -1,4 +1,4 @@
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
 import os, sys
 sys.path.append('./cython')
@@ -23,8 +23,6 @@ def initialise_cython(scintillator, track_structure, LET_MeV_cm, print_info = Tr
         print("\n# ===============================")
         print("# Energy = %0.3g MeV" % E_MeV)
         print("# LET = %0.3g MeV/cm" % LET_MeV_cm)
-    # print("# biQuenchFactor factor = %0.3g" % biQuenchFactor)
-    # print("# Ion diff factor = %0.3g*e-4" % ion_diff_factor)
 
 
     # find an appropriate time step, upper limit defined by the von Neumann criterion
@@ -35,7 +33,6 @@ def initialise_cython(scintillator, track_structure, LET_MeV_cm, print_info = Tr
         SCALE_TIME *= 1.05
         # stop if the calculation takes too long:
         if SCALE_TIME > 1000:
-            # print ("# fucked up")
             return -1, SCALE_TIME
 
         emissionResults = PDEsolver(track_structure,
@@ -75,8 +72,6 @@ def initialise_cython(scintillator, track_structure, LET_MeV_cm, print_info = Tr
     return QCF
 
 
-
-
 if __name__ == "__main__":
 
     print_info = False
@@ -101,13 +96,9 @@ if __name__ == "__main__":
     with open(fname, "w") as outfile:
         print("# LET,\tQCF: \n# ============")
         outfile.write(ptext)
-        # outfile.write("# Scintillator: %s\n" % scintillator)
-        # outfile.write("# Track structure model: %s\n" % track_structure)
-        # outfile.write("# LET [MeV/cm], QCF\n")
         for idx, LET_MeV_cm in enumerate(LET_MeV_cm_list):
             QCF = QCF_list[idx]
             print_text = "%0.3g,\t%0.3g" % (LET_MeV_cm, QCF)
             save_text = "%0.3g,%0.3g\n" % (LET_MeV_cm, QCF)
             print(print_text)
             outfile.write(save_text)
-
