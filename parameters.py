@@ -18,10 +18,10 @@ def E_MeV_beta_from_LET(LET_list):
         % (min(d_LET), max(d_LET))
         raise ValueError(error_text)
 
-    interpolated_energy = interp1d(d_LET, d_E_MeV, kind = 'cubic')
+    interpolated_energy = interp1d(d_LET, d_E_MeV)
     energy_list = interpolated_energy(LET_list)
 
-    interpolated_beta = interp1d(d_LET, d_beta , kind = 'cubic')
+    interpolated_beta = interp1d(d_LET, d_beta)
     beta_list = interpolated_beta(LET_list)
     return energy_list, beta_list
 
@@ -76,8 +76,8 @@ def track_structure_parameters(name, LET_MeV_cm, density_g_cm3, print_info):
 
     rMin_cm /= density_g_cm3
     rMax_cm /= density_g_cm3
-    print("r max = ", rMax_cm)
-    print("r min = ", rMin_cm)
+    # print("r max = ", rMax_cm)
+    # print("r min = ", rMin_cm)
 
     if name == "Gaussian":
         voxelSize = b_cm/40. # [cm] distance between two neighbouring voxels
@@ -102,22 +102,14 @@ def integrate_signal(emissionResults):
 
 
 def Blanc_parameters(track_structure, print_info):
-
-    path = "../../fff.py"
-    if os.path.isfile(path):
-        Blanc_parameters = [0, 0, 0]
-        if print_info:
-            print("\n# Loading the Blanc parameters from: \n# %s" % path)
-    else:
-        # [diffusion, bimolecular quenching, trimolecular quenching]
-        quench_dic = {
-            "Gaussian" : [4.28532,1.3413,0.0910405],
-            "Scholz_Kraft" : [5,4.5068,0.266882],
-            "Chatterjee_Schaefer" : [5.97,0.606107,0.00419259]
-            }
-        Blanc_params = np.asarray(quench_dic[track_structure])
-        if print_info:
-            print("# Loading the tabulated Blanc parameters")
+    quench_dic = {
+        "Gaussian" : [4.28532,1.3413,0.0910405],
+        "Scholz_Kraft" : [5,4.5068,0.266882],
+        "Chatterjee_Schaefer" : [5.97,0.606107,0.00419259]
+        }
+    Blanc_params = np.asarray(quench_dic[track_structure])
+    if print_info:
+        print("# Loading the tabulated Blanc parameters")
 
     # diffusion in units of [1e-5 cm^2/s]
     Blanc_params[0] *= 1e-5
