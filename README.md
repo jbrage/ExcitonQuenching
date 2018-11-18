@@ -5,9 +5,6 @@ Further details can be found in
 Christensen JB and Andersen CE (2018) _Relating ionization quenching in organic plastic scintillators to basic material properties by modelling excitation density transport and amorphous track structure during proton irradiation_, Phys. Med. Biol.      
 https://doi.org/10.1088/1361-6560/aadf2d
 
-_OBS: To be updated_  
-Please contact jeppebrage@gmail.com if intended to use
-
 ## Installation
 Linux (Tested on Ubuntu 16.04)
 
@@ -27,13 +24,13 @@ sudo apt-get install cython
 
 Compile the cython code used to solve the Blanc equation
 ```
-cd ExcitonQuenching/cython && make
+cd ExcitonQuenching/EQ_cythonized_PDE && make
 ```
 which creates the shared object evolveDensitiesCython.so.
 ```
-cd ../ && python main.py
+cd ../ && python3 example.py
 ```
-will run a test version
+will execute an example
 
 
 
