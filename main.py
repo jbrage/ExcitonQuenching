@@ -1,104 +1,88 @@
-import matplotlib.pyplot as plt
 import numpy as np
-import os, sys
-sys.path.append('./cython')
+import sys
+sys.path.append('./EQ_cythonized_PDE')
 from evolveDensitiesCython import PDEsolver
-from parameters import scintillator_parameters, track_structure_parameters, \
-    Blanc_parameters, integrate_signal
 
-def initialise_cython(scintillator, track_structure, LET_MeV_cm, print_info = True):
-
-    # load scintillator specific parameters
-    tau_s, A_MeV, density_g_cm3 = scintillator_parameters(scintillator, print_info)
-    N_0 = A_MeV * LET_MeV_cm # linear exciton density
-
-    # load track structure parameters
-    TS_parameters = track_structure_parameters(track_structure, LET_MeV_cm, density_g_cm3, print_info)
-    E_MeV, rMin_cm, rMax_cm, voxelSize, gridSize = TS_parameters
-
-    # load the parameters for the Blanc model
-    D_diff, alpha_bimol, beta_trimol = Blanc_parameters(track_structure, print_info)
-
-    if print_info:
-        print("\n# ===============================")
-        print("# Energy = %0.3g MeV" % E_MeV)
-        print("# LET = %0.3g MeV/cm" % LET_MeV_cm)
+from EQ_model_functions.functions import scintillator_parameters, track_structure_parameters, \
+    Blanc_model_parameters, integrate_signal
 
 
-    # find an appropriate time step, upper limit defined by the von Neumann criterion
-    SCALE_TIME = 1.0
-    emissionResults = [-1]
-    while emissionResults[0] < 0:
+def getQCF(scintillator_name, track_structure_name, E_MeV_per_A, z_projectile, A_projectile):
+    '''
+    Calculate the quenching correction factor
 
-        SCALE_TIME *= 1.05
-        # stop if the calculation takes too long:
-        if SCALE_TIME > 1000:
-            return -1, SCALE_TIME
+    INPUT:
+    - scintillator name
+    - track structure model
+    - kinetic energy per nucleon [MeV/A]
+    - projectile charge (multipla of the elementary charge)
+    - nucleon number of the projectile
 
-        emissionResults = PDEsolver(track_structure,
-                                    N_0,
-                                    D_diff,
-                                    gridSize,
-                                    voxelSize,
-                                    alpha_bimol,
-                                    tau_s,
-                                    rMax_cm,
-                                    rMin_cm,
-                                    print_info,
-                                    SCALE_TIME
+    OUTPUT:
+    - array with the quenching correction factors for each specified energy
+    '''
+
+    # scintillator parameters
+    scint_decaytime_s, light_yield, density_g_cm3, Z_A_scintillator = scintillator_parameters(scintillator_name)
+
+    # Blanc model parameters
+    diff_cm2_s, alpha_cm3_s, beta_cm6_s = Blanc_model_parameters(track_structure_name)
+
+    # projectile track parameters
+    rMin_cm, rMax_cm, LET_MeV_cm = track_structure_parameters(
+                                                            track_structure_name,
+                                                            E_MeV_per_A,
+                                                            z_projectile,
+                                                            A_projectile,
+                                                            density_g_cm3,
+                                                            Z_A_scintillator
+                                                        )
+
+    N_0 = light_yield * LET_MeV_cm # linear exciton density
+    QCF_array = np.empty(len(E_MeV_per_A))
+
+    for idx, (N0, rmin, rmax) in enumerate(zip(N_0, rMin_cm, rMax_cm)):
+        n_tries = 1 # number of times the functions recursively calls itself to find a time step dt
+
+        emissionResults = PDEsolver(track_structure_name,
+                                        N0,
+                                        rmin,
+                                        rmax,
+                                        scint_decaytime_s,
+                                        n_tries,
+                                        diff_cm2_s,
+                                        alpha_cm3_s,
+                                        beta_cm6_s
+                                    )
+        scintillator_response, dt, n_tries = integrate_signal(emissionResults)
+
+
+        # reference calculation using the same time step as above
+        reference_results = PDEsolver(track_structure_name,
+                                        N0,
+                                        rmin,
+                                        rmax,
+                                        scint_decaytime_s,
+                                        n_tries,
+                                        diff_cm2_s,
+                                        dt = dt
                                     )
 
-    scint_response = integrate_signal(emissionResults)
+        reference_signal, dt, n_tries = integrate_signal(reference_results)
 
-    # ==========================================================================
-    # Calculate the fluorescence of max(LET) with \biQuenchFactor = 0
-    # for a linear respone
-    reference_results = PDEsolver(track_structure,
-                                N_0,
-                                D_diff,
-                                gridSize,
-                                voxelSize,
-                                0., # alpha_bimol
-                                tau_s,
-                                rMax_cm,
-                                rMin_cm,
-                                print_info,
-                                SCALE_TIME
-                                )
+        QCF = reference_signal / scintillator_response
+        QCF_array[idx] = QCF
 
+    return LET_MeV_cm, QCF_array
 
-    ref_signal = integrate_signal(reference_results)
-    QCF = ref_signal / scint_response
-    return QCF
 
 
 if __name__ == "__main__":
 
-    print_info = False
     scintillator = "BCF-12"
-    track_structure = "Gaussian"
-    track_structure = "Scholz_Kraft"
-    track_structure = "Chatterjee_Schaefer"
-    LET_MeV_cm_list = [30, 40, 50]
-    QCF_list = []
+    track_structure_name = "Scholz_Kraft"
 
-    for LET_MeV_cm in LET_MeV_cm_list:
-        QCF = initialise_cython(scintillator, track_structure, LET_MeV_cm, print_info)
-        QCF_list.append(QCF)
+    z_projectile, A_projectile = 2, 4
+    E_MeV_per_A = np.linspace(10, 200, 3)
 
-    ptext ="""# Scintillator: %s
-# Track structure model: %s
-# LET [MeV/cm], QCF
-""" % (scintillator, track_structure)
-
-    os.system("mkdir -p results")
-    fname = "results/%s_%s.txt" % (scintillator, track_structure)
-    with open(fname, "w") as outfile:
-        print("# LET,\tQCF: \n# ============")
-        outfile.write(ptext)
-        for idx, LET_MeV_cm in enumerate(LET_MeV_cm_list):
-            QCF = QCF_list[idx]
-            print_text = "%0.3g,\t%0.3g" % (LET_MeV_cm, QCF)
-            save_text = "%0.3g,%0.3g\n" % (LET_MeV_cm, QCF)
-            print(print_text)
-            outfile.write(save_text)
+    getQCF(scintillator, track_structure_name, E_MeV_per_A, z_projectile, A_projectile)
