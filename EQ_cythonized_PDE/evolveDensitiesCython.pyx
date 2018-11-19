@@ -188,8 +188,15 @@ def PDEsolver( str track_structure_model,
     '''
 
     # grid values from stability tests
-    cdef double voxelSize_cm = 5e-9
-    cdef int nVoxelsArray = int(1e-6/voxelSize_cm)
+    cdef double voxelSize_cm = 3e-8
+    cdef int nVoxelsArray = int(1.0e-5/voxelSize_cm)
+    
+    if track_structure_model == 'Chatterjee_Schaefer':
+        voxelSize_cm = 0.8e-8
+        nVoxelsArray = int(1.0e-5/voxelSize_cm)
+
+    # cdef double voxelSize_cm = 10e-9
+    # cdef int nVoxelsArray = int(5e-5/voxelSize_cm)
 
     # preallocate variables and arrays
     cdef np.ndarray[DTYPE_t, ndim=1] exctionArray = np.empty(nVoxelsArray)
