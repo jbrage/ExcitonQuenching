@@ -1,16 +1,16 @@
 # ExcitonQuenching
 Calculation of ionization quenching correction factors in organic plastic scintillators.
 
-Further details can be found in  
-Christensen JB and Andersen CE (2018) _Relating ionization quenching in organic plastic scintillators to basic material properties by modelling excitation density transport and amorphous track structure during proton irradiation_, Phys. Med. Biol.      
-https://doi.org/10.1088/1361-6560/aadf2d
+Details and background material is given in
+Christensen JB and Andersen CE (2018) _Phys. Med. Biol._ __63__ 195010  
+DOI: https://doi.org/10.1088/1361-6560/aadf2d
 
 ## Installation
 Linux (Tested on Ubuntu 16.04)
 
 This version was tested with
 
-* python2 and python3
+* python3
 * Cython 0.27 or newer 
 * GNU Make v. 4.1
 
@@ -21,16 +21,16 @@ sudo apt-get install make
 sudo apt-get install cython
 ```
 ## Run an example
+(Download e.g. with ```git clone https://github.com/jbrage/ExcitonQuenching```)
 
-Compile the cython code used to solve the Blanc equation
+Compile the cython code used to solve the Blanc equation for a given ion and scintillator
 ```
 cd ExcitonQuenching/EQ_cythonized_PDE && make
 ```
 which creates the shared object evolveDensitiesCython.so.
-```
-cd ../ && python3 example.py
-```
-will execute an example
+
+Run an example with the BCF-12 scintillator exposed to a helium ion at several energies:
+```python3 example.py```
 
 
 
