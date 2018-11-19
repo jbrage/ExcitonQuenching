@@ -20,7 +20,7 @@ Install e.g. with
 sudo apt-get install make
 sudo apt-get install cython
 ```
-## Run an example
+
 (Download e.g. with ```git clone https://github.com/jbrage/ExcitonQuenching```)
 
 Compile the cython code used to solve the Blanc equation for a given ion and scintillator
@@ -29,6 +29,7 @@ cd ExcitonQuenching/EQ_cythonized_PDE && make
 ```
 which creates the shared object evolveDensitiesCython.so.
 
+## Run an example
 Run an example with the BCF-12 scintillator exposed to a helium ion at several energies:  
 ```
 python3 example.py
