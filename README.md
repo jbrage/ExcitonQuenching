@@ -1,7 +1,7 @@
 # ExcitonQuenching
 Calculation of ionization quenching correction factors in organic plastic scintillators.
 
-Details and background material is given in  
+Details and background material given in  
 Christensen JB and Andersen CE (2018) _Phys. Med. Biol._ __63__ 195010  
 DOI: https://doi.org/10.1088/1361-6560/aadf2d
 
