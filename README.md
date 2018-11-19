@@ -30,7 +30,9 @@ cd ExcitonQuenching/EQ_cythonized_PDE && make
 which creates the shared object evolveDensitiesCython.so.
 
 Run an example with the BCF-12 scintillator exposed to a helium ion at several energies:  
-```python3 example.py```
+```
+python3 example.py
+```
 
 
 
