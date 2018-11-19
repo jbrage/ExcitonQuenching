@@ -65,18 +65,18 @@ def scintillator_parameters(scint_name):
 
 
 
-def core_radius_cm(beta, density_g_cm3):
-    '''
-    INPUT:
-    - beta = v/c
-    - scintillator density [g/cm^3]
-
-    OUTPUT:
-    - core radius [cm]
-    '''
-    r_core_cm = 11.6e-7
-    rMin_cm = r_core_cm *beta
-    return rMin_cm/density_g_cm3
+# def core_radius_cm(beta, density_g_cm3):
+#     '''
+#     INPUT:
+#     - beta = v/c
+#     - scintillator density [g/cm^3]
+#
+#     OUTPUT:
+#     - core radius [cm]
+#     '''
+#     r_core_cm = 11.6e-7
+#     rMin_cm = r_core_cm *beta
+#     return rMin_cm/density_g_cm3
 
 
 def track_structure_parameters(track_structure_model, E_MeV_per_A, z_projectile, A_projectile, density_g_cm3, Z_A_scintillator = 0.555):
@@ -100,8 +100,9 @@ def track_structure_parameters(track_structure_model, E_MeV_per_A, z_projectile,
     E_MeV_per_A, LET_MeV_cm = stopping_power(E_MeV_per_A, z_projectile, A_projectile, density_g_cm3, Z_A_scintillator)
     beta = E_MeV_to_beta(E_MeV_per_A, A_projectile)
 
-    rMin_cm = core_radius_cm(beta, density_g_cm3)
+    # rMin_cm = core_radius_cm(beta, density_g_cm3)
 
+    r_core_cm = 11.6e-7
     if track_structure_model == "Gaussian":
         r0 = 0.5e-6 #cm
         b_cm = 2*r0/np.sqrt(np.pi) # from Birks (1964)
@@ -111,14 +112,16 @@ def track_structure_parameters(track_structure_model, E_MeV_per_A, z_projectile,
         gamma = 0.05e-4
         delta = 1.7
         rMax_cm = gamma*E_MeV_per_A**delta
-
+        rMin_cm = r_core_cm*np.ones(len(E_MeV_per_A))
     elif track_structure_model == 'Chatterjee_Schaefer':
         rMax_um = 0.768*E_MeV_per_A - 1.925*np.sqrt(E_MeV_per_A) + 1.257
         rMax_cm = rMax_um*1e-4 # to cm
+        rMin_cm = r_core_cm *beta
     else:
         print("Track structure model unknown")
 
     rMax_cm /= density_g_cm3
+    rMin_cm /= density_g_cm3
 
     return rMin_cm, rMax_cm, LET_MeV_cm
 
@@ -144,14 +147,18 @@ def Blanc_model_parameters(track_structure):
     2) quenching parameter alpha [cm^3/s]
     3) quenching parameter beta [cm^6/s]
 
+    beta = 0. in this current (lacks experimental data for high-LET)
+
     See
         Christensen JB and Andersen CE (2018), Phys. Med. Biol. (63) 195010
     for details
     '''
+
+    diff_cm2_s = 5.0e-4
     track_structure_params = {
-        "Gaussian" :            [4.3e-5, 1.3e-9, 0.1e-25],
-        "Scholz_Kraft" :        [1.2e-5, 5.9e-9, 0.0e-25],
-        "Chatterjee_Schaefer" : [3.0e-5, 0.61e-9, 0.00012e-25]
+        "Gaussian" :            [diff_cm2_s, 4.5e-9, 0.0e-25],
+        "Scholz_Kraft" :        [diff_cm2_s, 9.0e-8, 0.0e-25],
+        "Chatterjee_Schaefer" : [diff_cm2_s, 1.5e-9, 0.0e-31]
     }
 
     TSnames = track_structure_params.keys()
