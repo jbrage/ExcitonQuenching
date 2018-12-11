@@ -78,7 +78,7 @@ def Gaussian_distribution(int nVoxelsArray, double voxelSize_cm, double N_0):
     cdef double nExcitons = 0.0, distance_cm, ExcitonDensity
     cdef double r0_cm = 0.5e-6, b_cm = 2*r0_cm/sqrt(pi)
     cdef double Gaussian_factor = N_0/(pi*b_cm*b_cm)
-    cdef size_t voxel_i, mid_array = int(nVoxelsArray/2.)
+    cdef int voxel_i, mid_array = int(nVoxelsArray/2.)
 
     for voxel_i in range(nVoxelsArray):
         distance_cm = abs(voxel_i - mid_array)*voxelSize_cm
@@ -117,7 +117,7 @@ def amorphous_track_structure_model_distribution(str track_structure_model,
     cdef np.ndarray[DTYPE_t, ndim=1] exctionArray = np.zeros(nVoxelsArray)
     cdef double nExcitons_penumbra = 0., nExcitons_core = 0.
     cdef double nExcitons, distance_cm, SK_const, CS_const
-    cdef size_t voxel_i, mid_array = int(nVoxelsArray/2.)
+    cdef int voxel_i, mid_array = int(nVoxelsArray/2.)
 
     # calculate core and penumbral exciton densities
     # (or simply return the Gaussian)
