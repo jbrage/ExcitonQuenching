@@ -7,12 +7,11 @@ from libc.math cimport exp, sqrt, M_PI as pi, log, abs
 
 DTYPE = np.double
 ctypedef np.double_t DTYPE_t
+
 cimport cython
-
-
-@cython.boundscheck(False)  # turn off bounds-checking for entire function
-@cython.wraparound(False)  # turn off negative index wrapping for function
-@cython.cdivision(False)  # turn off checks for zero division
+@cython.boundscheck(False) # turn off bounds-checking for entire function
+@cython.wraparound(False)  # turn off negative index wrapping for entire function
+@cython.cdivision(False) # turn off checks for zero division
 
 
 def find_time_step_dt(double diff_cm2_s, double voxelSize_cm):
@@ -36,10 +35,11 @@ def find_time_step_dt(double diff_cm2_s, double voxelSize_cm):
     while not von_neumann_expression:
         dt /= 1.1
         sx = diff_cm2_s*dt/(voxelSize_cm*voxelSize_cm)
-        cx = 0.  # not used in current version
+        cx = 0. # not used in curent version
         # check von Neumann's criterion
         von_neumann_expression = (2*sx + cx*cx <= 1 and cx*cx <= 2*sx)
     return dt, sx
+
 
 
 def calculate_time_steps(double decay_time_tau_s, double dt):
@@ -54,12 +54,12 @@ def calculate_time_steps(double decay_time_tau_s, double dt):
     - number of iterations in time
     '''
     cdef double scale_factor = 5
-    cdef size_t computation_steps, min_number_steps = 100
-    computation_steps = int(scale_factor*decay_time_tau_s/dt)
+    cdef size_t computation_time_steps, min_number_steps = 100
+    computation_time_steps = int(scale_factor*decay_time_tau_s/dt)
 
-    if computation_steps < min_number_steps:
-        computation_steps = min_number_steps
-    return computation_steps
+    if computation_time_steps < min_number_steps:
+        computation_time_steps = min_number_steps
+    return computation_time_steps
 
 
 def Gaussian_distribution(int nVoxelsArray, double voxelSize_cm, double N_0):
@@ -72,30 +72,30 @@ def Gaussian_distribution(int nVoxelsArray, double voxelSize_cm, double N_0):
 
     OUTPUT:
     - 1D array with a centered Gaussian distribution
-    - number of excitons
+    - number of exitons
     '''
-    cdef np.ndarray[DTYPE_t, ndim = 1] excitonArray = np.zeros(nVoxelsArray)
-    cdef double nExcitons = 0.0, dist_cm, exc_density
+    cdef np.ndarray[DTYPE_t, ndim=1] exctionArray = np.zeros(nVoxelsArray)
+    cdef double nExcitons = 0.0, distance_cm, ExcitonDensity
     cdef double r0_cm = 0.5e-6, b_cm = 2*r0_cm/sqrt(pi)
     cdef double Gaussian_factor = N_0/(pi*b_cm*b_cm)
     cdef int voxel_i, mid_array = int(nVoxelsArray/2.)
 
     for voxel_i in range(nVoxelsArray):
-        dist_cm = abs(voxel_i - mid_array)*voxelSize_cm
-        exc_density = Gaussian_factor*exp(-dist_cm*dist_cm/(b_cm*b_cm))
+        distance_cm = abs(voxel_i - mid_array)*voxelSize_cm
+        ExcitonDensity = Gaussian_factor * exp( - distance_cm*distance_cm/(b_cm*b_cm))
 
-        excitonArray[voxel_i] = exc_density
-        nExcitons += exc_density
-    return excitonArray, nExcitons
+        exctionArray[voxel_i] = ExcitonDensity
+        nExcitons += ExcitonDensity
+    return exctionArray, nExcitons
 
 
 def amorphous_track_structure_model_distribution(str track_structure_model,
-                                                 int nVoxelsArray,
-                                                 double voxelSize_cm,
-                                                 double N_0,
-                                                 double core_radius_cm,
-                                                 double penumbra_radius_cm
-                                                 ):
+                                            int nVoxelsArray,
+                                            double voxelSize_cm,
+                                            double N_0,
+                                            double core_radius_cm,
+                                            double penumbra_radius_cm
+                                           ):
     '''
     Distributes the excitons according to the selected track structure model
     and evovles the system according to the Lax-Wendroff scheme.
@@ -114,9 +114,9 @@ def amorphous_track_structure_model_distribution(str track_structure_model,
     - 1D array with a centered Gaussian distribution
     - number of exitons
     '''
-    cdef np.ndarray[DTYPE_t, ndim = 1] excitonArray = np.zeros(nVoxelsArray)
+    cdef np.ndarray[DTYPE_t, ndim=1] exctionArray = np.zeros(nVoxelsArray)
     cdef double nExcitons_penumbra = 0., nExcitons_core = 0.
-    cdef double nExcitons, dist_cm, SK_const, CS_const
+    cdef double nExcitons, distance_cm, SK_const, CS_const
     cdef int voxel_i, mid_array = int(nVoxelsArray/2.)
 
     # calculate core and penumbral exciton densities
@@ -134,34 +134,34 @@ def amorphous_track_structure_model_distribution(str track_structure_model,
 
     # insert the ion track exciton densities in the array
     for voxel_i in range(nVoxelsArray):
-        dist_cm = abs(voxel_i - mid_array)*voxelSize_cm
-        if dist_cm <= core_radius_cm:
+        distance_cm = abs(voxel_i - mid_array)*voxelSize_cm
+        if distance_cm <= core_radius_cm:
             # core region
-            excitonArray[voxel_i] = core/(core_radius_cm*core_radius_cm)
+            exctionArray[voxel_i] = core/(core_radius_cm*core_radius_cm)
             nExcitons_core += core/(core_radius_cm*core_radius_cm)
-        elif (dist_cm > core_radius_cm and dist_cm <= penumbra_radius_cm):
+        elif (distance_cm > core_radius_cm and distance_cm <= penumbra_radius_cm):
             # penumbral region
-            excitonArray[voxel_i] = penumbra/(dist_cm*dist_cm)
-            nExcitons_penumbra += penumbra/(dist_cm*dist_cm)
+            exctionArray[voxel_i] = penumbra/(distance_cm*distance_cm)
+            nExcitons_penumbra += penumbra/(distance_cm*distance_cm)
         else:
             # larger than track radius
-            excitonArray[voxel_i] = 0.
+            exctionArray[voxel_i] = 0.
 
     nExcitons = nExcitons_core + nExcitons_penumbra
-    return excitonArray, nExcitons
+    return exctionArray, nExcitons
 
 
-def PDEsolver(str track_structure_model,
-              double N_0,
-              double core_radius_cm,
-              double penumbra_radius_cm,
-              double decay_time_tau_s,
-              int n_tries,
-              double diff_cm2_s,
-              double alpha = 0.,
-              double beta = 0.,
-              double dt = -1
-              ):
+def PDEsolver( str track_structure_model,
+               double N_0,
+               double core_radius_cm,
+               double penumbra_radius_cm,
+               double decay_time_tau_s,
+               int n_tries,
+               double diff_cm2_s,
+               double alpha = 0.,
+               double beta = 0.,
+               double dt = -1
+               ):
 
     '''
     Solve the Blanc model equation subject to the initial condition
@@ -190,7 +190,7 @@ def PDEsolver(str track_structure_model,
     # grid values from stability tests
     cdef double voxelSize_cm = 3e-8
     cdef int nVoxelsArray = int(1.0e-5/voxelSize_cm)
-
+    
     if track_structure_model == 'Chatterjee_Schaefer':
         voxelSize_cm = 0.8e-8
         nVoxelsArray = int(1.0e-5/voxelSize_cm)
@@ -199,29 +199,29 @@ def PDEsolver(str track_structure_model,
     # cdef int nVoxelsArray = int(5e-5/voxelSize_cm)
 
     # preallocate variables and arrays
-    cdef np.ndarray[DTYPE_t, ndim=1] excitonArray = np.empty(nVoxelsArray)
-    cdef np.ndarray[DTYPE_t, ndim=1] excitonArray_temp = np.empty(nVoxelsArray)
+    cdef np.ndarray[DTYPE_t, ndim=1] exctionArray = np.empty(nVoxelsArray)
+    cdef np.ndarray[DTYPE_t, ndim=1] exctionArray_temp = np.empty(nVoxelsArray)
     cdef double nExcitons, events_per_s, flourescenceRate, quenchingRate
     cdef size_t i
 
-    cdef double countUniMolQuenched, countBiMolQuenched, countTriMolQuenched
-    cdef double fluorescenceCounter, n_Excitons, fluorescenceRatio = 0.5
-    cdef double excitonArray_temp_voxel = 0., fluorescence = 0., ExcitonLoss
-    cdef double unimolQuenching, bimolecularQuench, trimolecularQuench
+    cdef double countUniMolQuenched, countBiMolQuenched, countTriMolQuenched, fluorescenceCounter
+    cdef double n_Excitons, fluorescenceRatio = 0.5
+    cdef double exctionArray_temp_voxel = 0., fluorescence = 0.,
+    cdef double unimolQuenching, bimolecularQuench, trimolecularQuench, ExcitonLoss
     cdef int time_step
 
     # Calculate the time step dt
     cdef double sx
-    cdef size_t computation_steps
+    cdef size_t computation_time_steps
     if dt > 0:
         sx = diff_cm2_s*dt/(voxelSize_cm*voxelSize_cm)
     else:
         dt, sx = find_time_step_dt(diff_cm2_s, voxelSize_cm)
-    computation_steps = calculate_time_steps(decay_time_tau_s, dt)
+    computation_time_steps = calculate_time_steps(decay_time_tau_s, dt)
 
     # preallocate the arrays for fluorescence emission as a function of time
-    cdef np.ndarray[DTYPE_t, ndim=1] fluoresc_emiss =np.empty(computation_steps)
-    cdef np.ndarray[DTYPE_t, ndim=1] time_s = np.empty(computation_steps)
+    cdef np.ndarray[DTYPE_t, ndim=1] fluorescence_emission = np.empty(computation_time_steps)
+    cdef np.ndarray[DTYPE_t, ndim=1] time_s = np.empty(computation_time_steps)
 
     # fluoresence and quenching rates
     events_per_s = 1./decay_time_tau_s
@@ -229,25 +229,25 @@ def PDEsolver(str track_structure_model,
     quenchingRate = events_per_s*(1-fluorescenceRatio)
 
     # get the Exciton densities and number of initialised excitons
-    excitonArray, nExcitons = amorphous_track_structure_model_distribution(
-                                                          track_structure_model,
-                                                          nVoxelsArray,
-                                                          voxelSize_cm,
-                                                          N_0,
-                                                          core_radius_cm,
-                                                          penumbra_radius_cm
-                                                                          )
+    exctionArray, nExcitons = amorphous_track_structure_model_distribution(
+                                            track_structure_model,
+                                            nVoxelsArray,
+                                            voxelSize_cm,
+                                            N_0,
+                                            core_radius_cm,
+                                            penumbra_radius_cm
+                                            )
 
     # iterate through the array
-    for time_step in range(computation_steps):
+    for time_step in range(computation_time_steps):
 
         fluorescenceCounter = 0.
         for i in range(1, nVoxelsArray-1):
             # evolve according to the Lax-Wendroff scheme
-            n_Excitons = excitonArray[i]
+            n_Excitons = exctionArray[i]
 
-            excitonArray_temp_voxel = sx*(excitonArray[i-1] + excitonArray[i+1])
-            excitonArray_temp_voxel += (1.- 2.*sx) * n_Excitons
+            exctionArray_temp_voxel = sx*(exctionArray[i-1] + exctionArray[i+1])
+            exctionArray_temp_voxel += (1.- 2.*sx) * n_Excitons
 
             fluorescence = n_Excitons*flourescenceRate*dt
             unimolQuenching = n_Excitons*quenchingRate*dt
@@ -255,16 +255,15 @@ def PDEsolver(str track_structure_model,
             trimolecularQuench = beta*n_Excitons*n_Excitons*n_Excitons*dt
 
             fluorescenceCounter += fluorescence
-            ExcitonLoss = fluorescence + unimolQuenching + bimolecularQuench
-            ExcitonLoss += trimolecularQuench
+            ExcitonLoss = fluorescence + unimolQuenching + bimolecularQuench + trimolecularQuench
 
             # removing more exictons than avaliable?
             # return -1 => restarts function with a different time step dt
-            if ExcitonLoss > excitonArray_temp_voxel:
+            if ExcitonLoss > exctionArray_temp_voxel:
                 n_tries += 1
 
                 if n_tries > 20:
-                    error_msg = "# Voxel is too large for the LET.\n# Exiting."
+                    error_msg = "# Voxel is too large for the LET. \n# ... Exiting."
                     sys.exit(error_msg)
 
                 # try recursively again with a smaller time step
@@ -278,16 +277,16 @@ def PDEsolver(str track_structure_model,
                                 alpha,
                                 beta,
                                 dt = dt/2.
-                          )
+                                )
 
             else:
-                excitonArray_temp[i] = excitonArray_temp_voxel - ExcitonLoss
+                exctionArray_temp[i] = exctionArray_temp_voxel - ExcitonLoss
 
         time_s[time_step] = time_step*dt
-        fluoresc_emiss[time_step] = fluorescenceCounter
+        fluorescence_emission[time_step] = fluorescenceCounter
 
         # update the array before next iteration
         for i in range(1, nVoxelsArray-1):
-            excitonArray[i] = excitonArray_temp[i]
+            exctionArray[i] = exctionArray_temp[i]
 
-    return [nExcitons, time_s, fluoresc_emiss, dt, n_tries]
+    return [nExcitons, time_s, fluorescence_emission, dt, n_tries]

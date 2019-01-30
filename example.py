@@ -19,13 +19,14 @@ if __name__ == '__main__':
     scintillator = "BCF-12"
     track_structure_name = "Scholz_Kraft"
 
-    z_projectile, A_projectile = 2, 4 # helium
+    z_projectile, A_projectile = 2, 4  # helium
     E_MeV_per_A = np.linspace(2, 300, 10)
 
+    LET_MeV_cm, QCFs = getQCF(scintillator, track_structure_name, E_MeV_per_A,
+                              z_projectile, A_projectile)
 
-    LET_MeV_cm, QCFs = getQCF(scintillator, track_structure_name, E_MeV_per_A, z_projectile, A_projectile)
-
-    print("# Particle: z = {:d}, A = {:d}. \n# Scintillator: {} ".format(z_projectile, A_projectile, scintillator))
+    txt = [z_projectile, A_projectile, scintillator]
+    print("# Particle: z = {:d}, A = {:d}. \n# Scintillator: {} ".format(*txt))
     print("# E [MeV/A], LET [MeV/cm], QCFs")
 
     for (E, LET, QCF) in zip(E_MeV_per_A, LET_MeV_cm, QCFs):

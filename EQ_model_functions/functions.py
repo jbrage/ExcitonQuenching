@@ -1,9 +1,10 @@
 import numpy as np
 from scipy.integrate import trapz
-from EQ_model_functions.Bethe_Bloch_stopping_power import BetheBlochEq, E_MeV_to_beta
+from EQ_model_functions.Bethe_Bloch_stopping_power import BetheBlochEq, \
+                                                          E_MeV_to_beta
 
 
-def stopping_power(E_MeV_per_A, z_projectile, A_projectile, density_g_cm3, Z_A_scintillator):
+def stopping_power(E_MeV_per_A, z_ion, A_ion, density_g_cm3, Z_A_scintillator):
     '''
     Calculate the stopping power use the Bethe-Bloch formula
 
@@ -24,7 +25,7 @@ def stopping_power(E_MeV_per_A, z_projectile, A_projectile, density_g_cm3, Z_A_s
     dEdx_MeV_cm2_g = np.zeros(len(E_MeV_per_A))
     for idx, E_MeV in enumerate(E_MeV_per_A):
 
-        params = [E_MeV, z_projectile, A_projectile, Z_A_scintillator, use_shell_correction]
+        params = [E_MeV, z_ion, A_ion, Z_A_scintillator, use_shell_correction]
         dEdx_MeV_cm2_g[idx], too_slow = BetheBlochEq(*params)
 
     LET_MeV_cm = dEdx_MeV_cm2_g*density_g_cm3
@@ -46,14 +47,14 @@ def scintillator_parameters(scint_name):
     See e.g. https://www.crystals.saint-gobain.com/products/scintillating-fiber
     '''
 
-    Z_A_scintillator = 0.5555 # water
-    anthracene = 17400 # photons per MeV
+    Z_A_scintillator = 0.5555  # water
+    anthracene = 17400  # photons per MeV
 
     global scint_dic
     scint_dic = {
-        'BCF-12' : [3.2e-9, 0.46*anthracene, 1.05, Z_A_scintillator],
-        'BCF-60' : [7e-9,   0.41*anthracene, 1.05, Z_A_scintillator],
-        'BC-400' : [2.4e-9, 0.65*anthracene, 1.03, Z_A_scintillator],
+        'BCF-12': [3.2e-9, 0.46*anthracene, 1.05, Z_A_scintillator],
+        'BCF-60': [7e-9,   0.41*anthracene, 1.05, Z_A_scintillator],
+        'BC-400': [2.4e-9, 0.65*anthracene, 1.03, Z_A_scintillator],
         'Pilot-U': [1.4e-9, 0.76*anthracene, 1.023, Z_A_scintillator],
     }
 
@@ -62,7 +63,6 @@ def scintillator_parameters(scint_name):
     assert scint_name in scint_dic.keys(), error_text
 
     return scint_dic[scint_name]
-
 
 
 # def core_radius_cm(beta, density_g_cm3):
@@ -79,7 +79,8 @@ def scintillator_parameters(scint_name):
 #     return rMin_cm/density_g_cm3
 
 
-def track_structure_parameters(track_structure_model, E_MeV_per_A, z_projectile, A_projectile, density_g_cm3, Z_A_scintillator = 0.555):
+def track_structure_parameters(track_structure_model, E_MeV_per_A, z_ion,
+                               A_ion, density_g_cm3, Z_A_scintillator=0.555):
     '''
     Calculates the track structure radii for the ion track
 
@@ -97,15 +98,15 @@ def track_structure_parameters(track_structure_model, E_MeV_per_A, z_projectile,
     - LET [MeV/cm]
     '''
 
-    E_MeV_per_A, LET_MeV_cm = stopping_power(E_MeV_per_A, z_projectile, A_projectile, density_g_cm3, Z_A_scintillator)
-    beta = E_MeV_to_beta(E_MeV_per_A, A_projectile)
-
+    E_MeV_per_A, LET_MeV_cm = stopping_power(E_MeV_per_A, z_ion, A_ion,
+                                             density_g_cm3, Z_A_scintillator)
+    beta = E_MeV_to_beta(E_MeV_per_A, A_ion)
     # rMin_cm = core_radius_cm(beta, density_g_cm3)
 
     r_core_cm = 11.6e-7
     if track_structure_model == "Gaussian":
-        r0 = 0.5e-6 #cm
-        b_cm = 2*r0/np.sqrt(np.pi) # from Birks (1964)
+        r0 = 0.5e-6  # cm
+        b_cm = 2*r0/np.sqrt(np.pi)  # from Birks (1964)
         rMin_cm = b_cm*np.ones(len(LET_MeV_cm))
         rMax_cm = -1*np.ones(len(LET_MeV_cm))
     elif track_structure_model == "Scholz_Kraft":
@@ -115,14 +116,13 @@ def track_structure_parameters(track_structure_model, E_MeV_per_A, z_projectile,
         rMin_cm = r_core_cm*np.ones(len(E_MeV_per_A))
     elif track_structure_model == 'Chatterjee_Schaefer':
         rMax_um = 0.768*E_MeV_per_A - 1.925*np.sqrt(E_MeV_per_A) + 1.257
-        rMax_cm = rMax_um*1e-4 # to cm
-        rMin_cm = r_core_cm *beta
+        rMax_cm = rMax_um*1e-4  # to cm
+        rMin_cm = r_core_cm * beta
     else:
         print("Track structure model unknown")
 
     rMax_cm /= density_g_cm3
     rMin_cm /= density_g_cm3
-
     return rMin_cm, rMax_cm, LET_MeV_cm
 
 
@@ -156,9 +156,9 @@ def Blanc_model_parameters(track_structure):
 
     diff_cm2_s = 5.0e-4
     track_structure_params = {
-        "Gaussian" :            [diff_cm2_s, 4.5e-9, 0.0e-25],
-        "Scholz_Kraft" :        [diff_cm2_s, 9.0e-8, 0.0e-25],
-        "Chatterjee_Schaefer" : [diff_cm2_s, 1.5e-9, 0.0e-31]
+        "Gaussian":            [diff_cm2_s, 4.5e-9, 0.0e-25],
+        "Scholz_Kraft":        [diff_cm2_s, 9.0e-8, 0.0e-25],
+        "Chatterjee_Schaefer": [diff_cm2_s, 1.5e-9, 0.0e-31]
     }
 
     TSnames = track_structure_params.keys()
