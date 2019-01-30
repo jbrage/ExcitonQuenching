@@ -45,28 +45,29 @@ def getQCF(scintillator_name, track_structure_name,
         # times the functions recursively calls itself to find a time step dt
         n_tries = 1
 
-        emissionResults = PDEsolver(track_structure_name,
-                                        N0,
-                                        rmin,
-                                        rmax,
-                                        scint_decaytime_s,
-                                        n_tries,
-                                        diff_cm2_s,
-                                        alpha_cm3_s,
-                                        beta_cm6_s
-                                    )
+        emissionResults = PDEsolver(
+            track_structure_name,
+            N0,
+            rmin,
+            rmax,
+            scint_decaytime_s,
+            n_tries,
+            diff_cm2_s,
+            alpha_cm3_s,
+            beta_cm6_s)
+
         scintillator_response, dt, n_tries = integrate_signal(emissionResults)
 
         # reference calculation using the same time step as above
-        reference_results = PDEsolver(track_structure_name,
-                                        N0,
-                                        rmin,
-                                        rmax,
-                                        scint_decaytime_s,
-                                        n_tries,
-                                        diff_cm2_s,
-                                        dt = dt
-                                      )
+        reference_results = PDEsolver(
+            track_structure_name,
+            N0,
+            rmin,
+            rmax,
+            scint_decaytime_s,
+            n_tries,
+            diff_cm2_s,
+            dt=dt)
 
         reference_signal, dt, n_tries = integrate_signal(reference_results)
 
