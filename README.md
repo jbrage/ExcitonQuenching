@@ -1,9 +1,12 @@
 # ExcitonQuenching
 Calculation of ionization quenching correction factors in organic plastic scintillators.
 
-Details and background material given in  
-Christensen JB and Andersen CE (2018) _Phys. Med. Biol._ __63__ 195010  
-DOI: https://doi.org/10.1088/1361-6560/aadf2d
+Details, verifications, and background material given in  
+* Christensen JB and Andersen CE (2018) _Phys. Med. Biol._ __63__ 195010  
+  DOI: https://doi.org/10.1088/1361-6560/aadf2d
+
+* Christensen JB and Andersen CE (2019) _Rad. Meas._   
+  DOI: https://doi.org/10.1016/j.radmeas.2019.01.003
 
 ## Installation
 Linux (Tested on Ubuntu 16.04)
