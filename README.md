@@ -5,10 +5,10 @@ Details, verifications, and background material given in
 * Christensen JB and Andersen CE (2018) _Phys. Med. Biol._ __63__ 195010  
   DOI: https://doi.org/10.1088/1361-6560/aadf2d
 
-* Christensen JB and Andersen CE (2019) _Rad. Meas._   
+* Christensen JB and Andersen CE (2019) _Rad. Meas._ __124__ 158–162    
   DOI: https://doi.org/10.1016/j.radmeas.2019.01.003
   
-* Christensen JB _et al._ (2019) _Phys. Med. Biol._  
+* Christensen JB _et al._ (2019) _Phys. Med. Biol._ __64__ 095018  
   Ionization quenching in scintillators used for dosimetry of mixed particle fields  
   DOI: https://iopscience.iop.org/article/10.1088/1361-6560/ab12f2
 
